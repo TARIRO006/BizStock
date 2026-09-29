@@ -1,0 +1,206 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    Dashboard | BizStock
+{% endblock %}
+
+
+{% block content %}
+
+<div class="dashboard-header">
+
+    <div>
+        <p class="page-label">
+            BUSINESS OVERVIEW
+        </p>
+
+        <h1>
+            Welcome back, {{ request.user.first_name }} 👋
+        </h1>
+
+        <p class="page-description">
+            Here's what's happening with
+            {{ business.name }} today.
+        </p>
+    </div>
+
+</div>
+
+
+<!-- Dashboard Cards -->
+
+<div class="dashboard-cards">
+
+    <div class="stat-card">
+
+        <div class="stat-icon blue">
+            <i class="fa-solid fa-box"></i>
+        </div>
+
+        <div>
+            <p>Total Products</p>
+            <h2>0</h2>
+        </div>
+
+    </div>
+
+
+    <div class="stat-card">
+
+        <div class="stat-icon green">
+            <i class="fa-solid fa-money-bill"></i>
+        </div>
+
+        <div>
+            <p>Today's Sales</p>
+            <h2>MK 0</h2>
+        </div>
+
+    </div>
+
+
+    <div class="stat-card">
+
+        <div class="stat-icon orange">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+        </div>
+
+        <div>
+            <p>Low Stock</p>
+            <h2>0</h2>
+        </div>
+
+    </div>
+
+
+    <div class="stat-card">
+
+        <div class="stat-icon purple">
+            <i class="fa-solid fa-store"></i>
+        </div>
+
+        <div>
+            <p>Shops</p>
+            <h2>0</h2>
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- Main Dashboard Grid -->
+
+<div class="dashboard-grid">
+
+
+    <!-- Sales Overview -->
+
+    <div class="dashboard-panel sales-panel">
+
+        <div class="panel-header">
+
+            <div>
+                <h2>Sales Overview</h2>
+                <p>Your sales performance</p>
+            </div>
+
+            <select>
+                <option>This Week</option>
+                <option>This Month</option>
+                <option>This Year</option>
+            </select>
+
+        </div>
+
+        <div class="chart-placeholder">
+
+            <i class="fa-solid fa-chart-line"></i>
+
+            <p>
+                Sales chart will appear here
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <!-- Quick Actions -->
+
+    <div class="dashboard-panel">
+
+        <div class="panel-header">
+
+            <div>
+                <h2>Quick Actions</h2>
+                <p>Common tasks</p>
+            </div>
+
+        </div>
+
+
+        <div class="quick-actions">
+
+            <a href="#" class="quick-action">
+                <i class="fa-solid fa-plus"></i>
+                <span>Add Product</span>
+            </a>
+
+            <a href="#" class="quick-action">
+                <i class="fa-solid fa-cart-plus"></i>
+                <span>Record Purchase</span>
+            </a>
+
+            <a href="#" class="quick-action">
+                <i class="fa-solid fa-cash-register"></i>
+                <span>Record Sale</span>
+            </a>
+
+            <a href="#" class="quick-action">
+                <i class="fa-solid fa-truck"></i>
+                <span>Add Supplier</span>
+            </a>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- Low Stock -->
+
+<div class="dashboard-panel">
+
+    <div class="panel-header">
+
+        <div>
+            <h2>Low Stock Items</h2>
+            <p>Products that may need restocking</p>
+        </div>
+
+        <a href="#" class="view-all">
+            View Inventory
+        </a>
+
+    </div>
+
+
+    <div class="empty-state">
+
+        <i class="fa-solid fa-box-open"></i>
+
+        <h3>
+            No low-stock items
+        </h3>
+
+        <p>
+            Your low-stock products will appear here.
+        </p>
+
+    </div>
+
+</div>
+
+{% endblock %}

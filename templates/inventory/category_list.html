@@ -1,0 +1,146 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    Categories | BizStock
+{% endblock %}
+
+
+{% block content %}
+
+<div class="page-header">
+
+    <div>
+
+        <p class="page-label">
+            INVENTORY
+        </p>
+
+        <h1>
+            Categories
+        </h1>
+
+        <p class="page-description">
+            Organize your products into categories.
+        </p>
+
+    </div>
+
+
+    <a
+        href="{% url 'category_create' %}"
+        class="primary-button"
+    >
+
+        <i class="fa-solid fa-plus"></i>
+
+        Add Category
+
+    </a>
+
+</div>
+
+
+<div class="dashboard-panel">
+
+    <div class="panel-header">
+
+        <div>
+
+            <h2>
+                Product Categories
+            </h2>
+
+            <p>
+                {{ categories|length }}
+                categor{{ categories|length|pluralize:"y,ies" }}
+            </p>
+
+        </div>
+
+    </div>
+
+
+    {% if categories %}
+
+        <div class="category-list">
+
+            {% for category in categories %}
+
+                <div class="category-row">
+
+                    <div class="category-info">
+
+                        <div class="category-icon">
+
+                            <i class="fa-solid fa-layer-group"></i>
+
+                        </div>
+
+
+                        <div>
+
+                            <strong>
+                                {{ category.name }}
+                            </strong>
+
+                            <span>
+                                {{ category.products.count }}
+                                product{{ category.products.count|pluralize }}
+                            </span>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="category-actions">
+
+                        <a href="{% url 'category_edit' category.id %}" class="table-action" title="Edit category">
+                            <i class="fa-solid fa-pen"></i>
+                        </a>
+
+                        <a href="{% url 'category_delete' category.id %}" class="table-action delete-action" title="Delete category">
+                            <i class="fa-solid fa-trash"></i>
+                        </a>
+
+                    </div>
+
+                </div>
+
+            {% endfor %}
+
+        </div>
+
+    {% else %}
+
+        <div class="empty-state">
+
+            <i class="fa-solid fa-layer-group"></i>
+
+            <h3>
+                No categories yet
+            </h3>
+
+            <p>
+                Create your first category to organize your products.
+            </p>
+
+
+            <a
+                href="{% url 'category_create' %}"
+                class="primary-button"
+            >
+
+                <i class="fa-solid fa-plus"></i>
+
+                Add Category
+
+            </a>
+
+        </div>
+
+    {% endif %}
+
+</div>
+
+{% endblock %}

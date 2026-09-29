@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    Delete Category | BizStock
+{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+
+    <div>
+
+        <p class="page-label">
+            INVENTORY
+        </p>
+
+        <h1>
+            Delete Category
+        </h1>
+
+        <p class="page-description">
+            Confirm that you want to remove this category.
+        </p>
+
+    </div>
+
+</div>
+
+
+<div class="dashboard-panel delete-confirmation">
+
+    <div class="delete-icon">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+    </div>
+
+    <h2>
+        Delete "{{ category.name }}"?
+    </h2>
+
+    <p>
+        This category currently contains
+        <strong>{{ category.products.count }}</strong>
+        product{{ category.products.count|pluralize }}.
+    </p>
+
+    <p class="delete-warning">
+        Products will not be deleted, but they will no longer
+        belong to this category.
+    </p>
+
+
+    <div class="form-actions">
+
+        <a
+            href="{% url 'category_list' %}"
+            class="secondary-button"
+        >
+            Cancel
+        </a>
+
+        <form method="POST">
+
+            {% csrf_token %}
+
+            <button
+                type="submit"
+                class="danger-button"
+            >
+                <i class="fa-solid fa-trash"></i>
+                Delete Category
+            </button>
+
+        </form>
+
+    </div>
+
+</div>
+
+{% endblock %}

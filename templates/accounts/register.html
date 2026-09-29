@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Create Account | BizStock</title>
+</head>
+
+<body>
+
+    <h1>Create your BizStock account</h1>
+
+    <p>Start managing your business today.</p>
+
+    <form method="POST">
+
+        {% csrf_token %}
+
+        {{ form.non_field_errors }}
+
+        <div>
+            <label>First Name</label>
+            {{ form.first_name }}
+            {{ form.first_name.errors }}
+        </div>
+
+        <div>
+            <label>Last Name</label>
+            {{ form.last_name }}
+            {{ form.last_name.errors }}
+        </div>
+
+        <div>
+            <label>Username</label>
+            {{ form.username }}
+            {{ form.username.errors }}
+        </div>
+
+        <div>
+            <label>Email</label>
+            {{ form.email }}
+            {{ form.email.errors }}
+        </div>
+
+        <div>
+            <label>Password</label>
+            {{ form.password }}
+            {{ form.password.errors }}
+        </div>
+
+        <div>
+            <label>Confirm Password</label>
+            {{ form.confirm_password }}
+            {{ form.confirm_password.errors }}
+        </div>
+
+        <hr>
+
+        <h2>Business Information</h2>
+
+        <div>
+            <label>Business Name</label>
+            {{ form.business_name }}
+            {{ form.business_name.errors }}
+        </div>
+
+        <div>
+            <label>Business Type</label>
+            {{ form.business_type }}
+            {{ form.business_type.errors }}
+        </div>
+
+        <div>
+            <label>Phone</label>
+            {{ form.phone }}
+            {{ form.phone.errors }}
+        </div>
+
+        <div>
+            <label>Address</label>
+            {{ form.address }}
+            {{ form.address.errors }}
+        </div>
+
+        <button type="submit">
+            Create Account
+        </button>
+
+    </form>
+
+    <p>
+        Already have an account?
+        <a href="{% url 'login' %}">Login</a>
+    </p>
+
+</body>
+</html>

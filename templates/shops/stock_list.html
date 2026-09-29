@@ -1,0 +1,173 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    Stock | BizStock
+{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+
+    <div>
+
+        <p class="page-label">
+            INVENTORY
+        </p>
+
+        <h1>
+            Stock
+        </h1>
+
+        <p class="page-description">
+            View stock levels across your business locations.
+        </p>
+
+    </div>
+
+</div>
+
+
+<div class="dashboard-panel">
+
+    <div class="panel-header">
+
+        <div>
+
+            <h2>
+                Current Stock
+            </h2>
+
+            <p>
+                Stock available at each location.
+            </p>
+
+        </div>
+
+    </div>
+
+
+    {% if stock_records %}
+
+        <div class="table-container">
+
+            <table class="data-table">
+
+                <thead>
+
+                    <tr>
+
+                        <th>Product</th>
+
+                        <th>Location</th>
+
+                        <th>Type</th>
+
+                        <th>Quantity</th>
+
+                        <th>Minimum Stock</th>
+
+                        <th>Status</th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                    {% for stock in stock_records %}
+
+                        <tr>
+
+                            <td>
+
+                                <div class="product-name">
+
+                                    <div class="product-icon">
+                                        <i class="fa-solid fa-box"></i>
+                                    </div>
+
+                                    <strong>
+                                        {{ stock.product.name }}
+                                    </strong>
+
+                                </div>
+
+                            </td>
+
+
+                            <td>
+                                {{ stock.location.name }}
+                            </td>
+
+
+                            <td>
+                                {{ stock.location.get_location_type_display }}
+                            </td>
+
+
+                            <td>
+
+                                <strong>
+                                    {{ stock.quantity|floatformat:0 }}
+                                </strong>
+
+                                {{ stock.product.get_unit_display }}
+
+                            </td>
+
+
+                            <td>
+                                {{ stock.product.minimum_stock|floatformat:0 }}
+                            </td>
+
+
+                            <td>
+
+                                {% if stock.quantity <= stock.product.minimum_stock %}
+
+                                    <span class="status-badge inactive">
+                                        Low Stock
+                                    </span>
+
+                                {% else %}
+
+                                    <span class="status-badge active">
+                                        In Stock
+                                    </span>
+
+                                {% endif %}
+
+                            </td>
+
+                        </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    {% else %}
+
+        <div class="empty-state">
+
+            <i class="fa-solid fa-warehouse"></i>
+
+            <h3>
+                No stock records yet
+            </h3>
+
+            <p>
+                Stock will appear here once products are assigned to locations.
+            </p>
+
+        </div>
+
+    {% endif %}
+
+</div>
+
+{% endblock %}

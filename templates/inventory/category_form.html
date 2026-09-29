@@ -1,0 +1,130 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    Add Category | BizStock
+{% endblock %}
+
+
+{% block content %}
+
+<div class="page-header">
+
+    <div>
+
+        <p class="page-label">
+            INVENTORY
+        </p>
+
+        {% if editing %}
+
+    <h1>
+        Edit Category
+    </h1>
+
+    <p class="page-description">
+        Update the "{{ category.name }}" category.
+    </p>
+
+        {% else %}
+
+    <h1>
+        Add Category
+    </h1>
+
+    <p class="page-description">
+        Create a category for organizing your products.
+    </p>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+
+<form method="POST">
+
+    {% csrf_token %}
+
+
+    <div class="dashboard-panel">
+
+        <div class="panel-header">
+
+            <div>
+
+                <h2>
+                    Category Information
+                </h2>
+
+                <p>
+                    Enter the name of your new category.
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <div class="form-grid">
+
+            <div class="form-group form-group-full">
+
+                <label for="{{ form.name.id_for_label }}">
+                    Category Name
+                </label>
+
+                {{ form.name }}
+
+
+                {% if form.name.errors %}
+
+                    <div class="field-error">
+
+                        {{ form.name.errors.0 }}
+
+                    </div>
+
+                {% endif %}
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="form-actions">
+
+        <a
+            href="{% url 'category_list' %}"
+            class="secondary-button"
+        >
+            Cancel
+        </a>
+
+
+        <button
+            type="submit"
+            class="primary-button"
+        >
+
+            {% if editing %}
+
+                <i class="fa-solid fa-check"></i>
+                Update Category
+
+            {% else %}
+
+                <i class="fa-solid fa-check"></i>
+                Save Category
+
+            {% endif %}
+
+        </button>
+
+    </div>
+
+</form>
+
+{% endblock %}

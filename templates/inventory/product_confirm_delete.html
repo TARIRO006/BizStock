@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    Delete Product | BizStock
+{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+
+    <div>
+
+        <p class="page-label">
+            INVENTORY
+        </p>
+
+        <h1>
+            Delete Product
+        </h1>
+
+        <p class="page-description">
+            Confirm that you want to remove this product.
+        </p>
+
+    </div>
+
+</div>
+
+
+<div class="dashboard-panel delete-confirmation">
+
+    <div class="delete-icon">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+    </div>
+
+    <h2>
+        Delete "{{ product.name }}"?
+    </h2>
+
+    <p>
+        This will permanently remove this product from your product list.
+    </p>
+
+    <div class="form-actions">
+
+        <a
+            href="{% url 'product_list' %}"
+            class="secondary-button"
+        >
+            Cancel
+        </a>
+
+        <form method="POST">
+            {% csrf_token %}
+
+            <button
+                type="submit"
+                class="danger-button"
+            >
+                <i class="fa-solid fa-trash"></i>
+                Delete Product
+            </button>
+
+        </form>
+
+    </div>
+
+</div>
+
+{% endblock %}
