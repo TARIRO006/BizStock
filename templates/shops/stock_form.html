@@ -1,0 +1,146 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="page-header">
+
+    <div>
+
+        <div class="page-label">
+            STOCK
+        </div>
+
+        <h1>Add Stock</h1>
+
+        <p class="page-description">
+            Add an initial stock balance to a business location.
+        </p>
+
+    </div>
+
+</div>
+
+
+<div class="dashboard-panel">
+
+    <div class="panel-header">
+
+        <div>
+
+            <h2>Stock Details</h2>
+
+            <p>
+                Select the location, product and quantity.
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <form method="POST">
+
+        {% csrf_token %}
+
+
+        {% if form.non_field_errors %}
+
+            <div class="form-errors">
+                {{ form.non_field_errors }}
+            </div>
+
+        {% endif %}
+
+
+        <div class="form-grid">
+
+
+            <div class="form-group">
+
+                <label for="{{ form.location.id_for_label }}">
+                    Location
+                </label>
+
+                {{ form.location }}
+
+                {% for error in form.location.errors %}
+
+                    <div class="field-error">
+                        {{ error }}
+                    </div>
+
+                {% endfor %}
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label for="{{ form.product.id_for_label }}">
+                    Product
+                </label>
+
+                {{ form.product }}
+
+                {% for error in form.product.errors %}
+
+                    <div class="field-error">
+                        {{ error }}
+                    </div>
+
+                {% endfor %}
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label for="{{ form.quantity.id_for_label }}">
+                    Quantity
+                </label>
+
+                {{ form.quantity }}
+
+                {% for error in form.quantity.errors %}
+
+                    <div class="field-error">
+                        {{ error }}
+                    </div>
+
+                {% endfor %}
+
+            </div>
+
+
+        </div>
+
+
+        <div class="form-actions">
+
+            <a
+                href="{% url 'stock_list' %}"
+                class="secondary-button"
+            >
+                Cancel
+            </a>
+
+
+            <button
+                type="submit"
+                class="primary-button"
+            >
+
+                <i class="fa-solid fa-plus"></i>
+
+                Add Stock
+
+            </button>
+
+        </div>
+
+
+    </form>
+
+</div>
+
+{% endblock %}

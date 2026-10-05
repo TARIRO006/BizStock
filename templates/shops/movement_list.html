@@ -1,0 +1,181 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="page-header">
+
+    <div>
+
+        <div class="page-label">
+            STOCK HISTORY
+        </div>
+
+        <h1>Stock Movements</h1>
+
+        <p class="page-description">
+            View the history of stock entering and leaving your business.
+        </p>
+
+    </div>
+
+</div>
+
+
+<div class="dashboard-panel">
+
+    <div class="panel-header">
+
+        <div>
+            <h2>Movement History</h2>
+
+            <p>
+                All stock changes for your business.
+            </p>
+        </div>
+
+    </div>
+
+
+    <div class="table-container">
+
+        <table class="data-table">
+
+            <thead>
+
+                <tr>
+                    <th>Date</th>
+                    <th>Product</th>
+                    <th>Location</th>
+                    <th>Type</th>
+                    <th>Quantity</th>
+                    <th>Reference</th>
+                    <th>Created By</th>
+                </tr>
+
+            </thead>
+
+
+            <tbody>
+
+                {% for movement in movements %}
+
+                <tr>
+
+                    <td>
+                        {{ movement.created_at|date:"d M Y H:i" }}
+                    </td>
+
+
+                    <td>
+                        <strong>
+                            {{ movement.product.name }}
+                        </strong>
+                    </td>
+
+
+                    <td>
+                        {{ movement.location.name }}
+                    </td>
+
+
+                    <td>
+
+                        {% if movement.movement_type == 'purchase' %}
+
+                            <span class="status-badge active">
+                                Purchase
+                            </span>
+
+                        {% elif movement.movement_type == 'sale' %}
+
+                            <span class="status-badge inactive">
+                                Sale
+                            </span>
+
+                        {% elif movement.movement_type == 'transfer_in' %}
+
+                            <span class="status-badge active">
+                                Transfer In
+                            </span>
+
+                        {% elif movement.movement_type == 'transfer_out' %}
+
+                            <span class="status-badge inactive">
+                                Transfer Out
+                            </span>
+
+                        {% elif movement.movement_type == 'production' %}
+
+                            <span class="status-badge active">
+                                Production
+                            </span>
+
+                        {% elif movement.movement_type == 'consumption' %}
+
+                            <span class="status-badge inactive">
+                                Material Usage
+                            </span>
+
+                        {% else %}
+
+                            <span class="status-badge">
+                                Adjustment
+                            </span>
+
+                        {% endif %}
+
+                    </td>
+
+
+                    <td>
+                        {{ movement.quantity }}
+                    </td>
+
+
+                    <td>
+                        {{ movement.reference|default:"—" }}
+                    </td>
+
+
+                    <td>
+                        {{ movement.created_by.username|default:"System" }}
+                    </td>
+
+                </tr>
+
+
+                {% empty %}
+
+                <tr>
+
+                    <td colspan="7">
+
+                        <div class="empty-state">
+
+                            <i class="fa-solid fa-clock-rotate-left"></i>
+
+                            <h3>No stock movements yet</h3>
+
+                            <p>
+                                Stock movement history will appear here
+                                when stock is purchased, sold, transferred,
+                                or manufactured.
+                            </p>
+
+                        </div>
+
+                    </td>
+
+                </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+{% endblock %}

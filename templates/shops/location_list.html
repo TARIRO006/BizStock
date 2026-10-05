@@ -1,0 +1,192 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="page-header">
+
+    <div>
+        <div class="page-label">
+            LOCATIONS
+        </div>
+
+        <h1>Shops & Locations</h1>
+
+        <p class="page-description">
+            Manage your business shops and factories.
+        </p>
+    </div>
+
+    <a href="{% url 'location_create' %}" class="primary-button">
+        <i class="fa-solid fa-plus"></i>
+        Add Location
+    </a>
+
+</div>
+
+
+<div class="dashboard-panel">
+
+    <div class="panel-header">
+
+        <div>
+            <h2>Your Locations</h2>
+
+            <p>
+                Shops and factories belonging to your business.
+            </p>
+        </div>
+
+    </div>
+
+
+    <div class="table-container">
+
+        <table class="data-table">
+
+            <thead>
+
+                <tr>
+                    <th>Location</th>
+                    <th>Type</th>
+                    <th>Phone</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+
+            </thead>
+
+
+            <tbody>
+
+                {% for location in locations %}
+
+                <tr>
+
+                    <td>
+                        <div class="product-name">
+                            <div class="product-icon">
+                                {% if location.location_type == 'factory' %}
+                                    <i class="fa-solid fa-industry"></i>
+                                {% else %}
+                                    <i class="fa-solid fa-store"></i>
+                                {% endif %}
+                            </div>
+
+                            <div>
+                                <strong>
+                                    {{ location.name }}
+                                </strong>
+
+                                {% if location.address %}
+                                    <small>
+                                        {{ location.address }}
+                                    </small>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </td>
+
+
+                    <td>
+
+                        {% if location.location_type == 'factory' %}
+
+                            <span class="status-badge active">
+                                Factory
+                            </span>
+
+                        {% else %}
+
+                            <span class="status-badge active">
+                                Shop
+                            </span>
+
+                        {% endif %}
+
+                    </td>
+
+
+                    <td>
+                        {{ location.phone|default:"—" }}
+                    </td>
+
+
+                    <td>
+
+                        {% if location.is_active %}
+
+                            <span class="status-badge active">
+                                Active
+                            </span>
+
+                        {% else %}
+
+                            <span class="status-badge inactive">
+                                Inactive
+                            </span>
+
+                        {% endif %}
+
+                    </td>
+
+
+                    <td>
+
+                        <div class="table-actions">
+
+                            <a
+                                href="{% url 'location_edit' location.id %}"
+                                class="table-action"
+                            >
+                                <i class="fa-solid fa-pen"></i>
+                                Edit
+                            </a>
+
+                        </div>
+
+                    </td>
+
+                </tr>
+
+                {% empty %}
+
+                <tr>
+
+                    <td colspan="5">
+
+                        <div class="empty-state">
+
+                            <i class="fa-solid fa-store"></i>
+
+                            <h3>No locations yet</h3>
+
+                            <p>
+                                Add your first shop or factory to start
+                                managing stock by location.
+                            </p>
+
+                            <a
+                                href="{% url 'location_create' %}"
+                                class="primary-button"
+                            >
+                                <i class="fa-solid fa-plus"></i>
+                                Add Location
+                            </a>
+
+                        </div>
+
+                    </td>
+
+                </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+{% endblock %}

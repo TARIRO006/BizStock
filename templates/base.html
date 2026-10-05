@@ -69,6 +69,11 @@
                         <span>Stock</span>
                     </a>
 
+                    <a href="{% url 'movement_list' %}" class="nav-link">
+                        <i class="fa-solid fa-clock-rotate-left"></i>
+                        <span>Stock History</span>
+                    </a>
+
                     <a href="#" class="nav-link">
                         <i class="fa-solid fa-cart-shopping"></i>
                         <span>Purchases</span>
@@ -80,9 +85,9 @@
 
                     <p>Business</p>
 
-                    <a href="#" class="nav-link">
+                    <a href="{% url 'location_list' %}" class="nav-link">
                         <i class="fa-solid fa-store"></i>
-                        <span>Shops</span>
+                        <span>Shops & Locations</span>
                     </a>
 
                     <a href="#" class="nav-link">
