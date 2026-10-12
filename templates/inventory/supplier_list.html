@@ -1,0 +1,91 @@
+
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="page-header">
+    <div>
+        <div class="page-label">SUPPLIERS</div>
+        <h1>Suppliers</h1>
+        <p class="page-description">
+            Manage the businesses that supply your products and materials.
+        </p>
+    </div>
+
+    <a href="{% url 'supplier_create' %}" class="primary-button">
+        <i class="fa-solid fa-plus"></i>
+        Add Supplier
+    </a>
+</div>
+
+<div class="dashboard-panel">
+    <div class="panel-header">
+        <div>
+            <h2>Your Suppliers</h2>
+            <p>{{ suppliers|length }} supplier(s)</p>
+        </div>
+    </div>
+
+    <div class="table-container">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Supplier</th>
+                    <th>Contact Person</th>
+                    <th>Phone</th>
+                    <th>Email</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for supplier in suppliers %}
+                <tr>
+                    <td>
+                        <strong>{{ supplier.name }}</strong>
+                    </td>
+
+                    <td>{{ supplier.contact_person|default:"—" }}</td>
+                    <td>{{ supplier.phone|default:"—" }}</td>
+                    <td>{{ supplier.email|default:"—" }}</td>
+
+                    <td>
+                        {% if supplier.is_active %}
+                            <span class="status-badge active">Active</span>
+                        {% else %}
+                            <span class="status-badge inactive">Inactive</span>
+                        {% endif %}
+                    </td>
+
+                    <td>
+                        <a
+                            href="{% url 'supplier_edit' supplier.id %}"
+                            class="table-action"
+                        >
+                            <i class="fa-solid fa-pen"></i>
+                            Edit
+                        </a>
+                    </td>
+                </tr>
+
+                {% empty %}
+                <tr>
+                    <td colspan="6">
+                        <div class="empty-state">
+                            <i class="fa-solid fa-truck"></i>
+                            <h3>No suppliers yet</h3>
+                            <p>Add your first supplier to start recording supplier details.</p>
+                            <a href="{% url 'supplier_create' %}" class="primary-button">
+                                Add Supplier
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% endblock %}

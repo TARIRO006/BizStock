@@ -1,0 +1,82 @@
+
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <p class="page-label">INVENTORY MANAGEMENT</p>
+        <h1>Record Purchase</h1>
+        <p class="page-description">
+            Record products purchased from a supplier.
+        </p>
+    </div>
+</div>
+
+<form method="post" class="dashboard-panel">
+    {% csrf_token %}
+
+    <div class="panel-header">
+        <h2>Purchase Details</h2>
+    </div>
+
+    {{ form.non_field_errors }}
+
+    <div class="form-grid">
+        {% for field in form %}
+            <div class="form-group">
+                <label for="{{ field.id_for_label }}">
+                    {{ field.label }}
+                </label>
+                {{ field }}
+                {{ field.errors }}
+            </div>
+        {% endfor %}
+    </div>
+
+    <div class="panel-header">
+        <h2>Products Purchased</h2>
+    </div>
+
+    {{ formset.management_form }}
+    {{ formset.non_form_errors }}
+
+    <div id="purchase-items">
+        {% for item_form in formset %}
+            <div class="form-grid purchase-item-row">
+                {% for hidden in item_form.hidden_fields %}
+                    {{ hidden }}
+                {% endfor %}
+
+                {% for field in item_form.visible_fields %}
+                    <div class="form-group">
+                        <label for="{{ field.id_for_label }}">
+                            {{ field.label }}
+                        </label>
+                        {{ field }}
+                        {{ field.errors }}
+                    </div>
+                {% endfor %}
+
+                {% if item_form.instance.pk %}
+                    <div class="form-group">
+                        <label>{{ item_form.DELETE.label }}</label>
+                        {{ item_form.DELETE }}
+                        <span>Remove this item</span>
+                    </div>
+                {% endif %}
+            </div>
+        {% endfor %}
+    </div>
+
+    <div class="form-actions">
+        <button type="submit" class="primary-button">
+            Save Purchase Draft
+        </button>
+
+        <a href="{% url 'purchase_list' %}"
+           class="secondary-button">
+            Cancel
+        </a>
+    </div>
+</form>
+{% endblock %}

@@ -1,8 +1,10 @@
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib import messages
+from django.db import transaction
 
-from .models import Product, Category
-from .forms import ProductForm, CategoryForm
+from .models import Product, Category, Supplier,  Purchase
+from .forms import ProductForm, CategoryForm, SupplierForm, PurchaseForm, PurchaseItemFormSet
 
 
 @login_required
@@ -252,3 +254,178 @@ def category_delete(request, category_id):
             'category': category,
         }
     )
+
+
+
+@login_required
+def supplier_list(request):
+
+    business = request.user.userprofile.business
+
+    suppliers = Supplier.objects.filter(
+        business=business
+    )
+
+    return render(
+        request,
+        'inventory/supplier_list.html',
+        {'suppliers': suppliers}
+    )
+
+
+@login_required
+def supplier_create(request):
+
+    business = request.user.userprofile.business
+
+    if request.method == 'POST':
+        form = SupplierForm(request.POST)
+
+        if form.is_valid():
+            supplier = form.save(commit=False)
+            supplier.business = business
+            supplier.save()
+
+            return redirect('supplier_list')
+    else:
+        form = SupplierForm()
+
+    return render(
+        request,
+        'inventory/supplier_form.html',
+        {'form': form}
+    )
+
+
+@login_required
+def supplier_edit(request, supplier_id):
+
+    business = request.user.userprofile.business
+
+    supplier = get_object_or_404(
+        Supplier,
+        id=supplier_id,
+        business=business
+    )
+
+    if request.method == 'POST':
+        form = SupplierForm(
+            request.POST,
+            instance=supplier
+        )
+
+        if form.is_valid():
+            form.save()
+            return redirect('supplier_list')
+    else:
+        form = SupplierForm(instance=supplier)
+
+    return render(
+        request,
+        'inventory/supplier_form.html',
+        {
+            'form': form,
+            'editing': True,
+            'supplier': supplier,
+        }
+    )
+
+
+
+@login_required
+def purchase_create(request):
+    business = request.user.userprofile.business
+
+    purchase = Purchase(business=business)
+
+    if request.method == 'POST':
+        form = PurchaseForm(
+            request.POST,
+            instance=purchase,
+            business=business,
+        )
+
+        formset = PurchaseItemFormSet(
+            request.POST,
+            instance=purchase,
+            form_kwargs={'business': business},
+        )
+
+        if form.is_valid() and formset.is_valid():
+            items_to_save = [
+            item_form
+            for item_form in formset.forms
+            if item_form.cleaned_data
+            and not item_form.cleaned_data.get('DELETE', False)
+            and item_form.cleaned_data.get('product')
+            ]
+
+            if not items_to_save:
+                messages.error(
+                    request,
+                    'Add at least one product to the purchase.',
+                )
+            else:
+                with transaction.atomic():
+                    purchase = form.save(commit=False)
+                    purchase.business = business
+                    purchase.created_by = request.user
+                    purchase.status = 'draft'
+                    purchase.save()
+
+                    formset.instance = purchase
+                    formset.save(commit=False)
+
+                    for item in formset.deleted_objects:
+                        item.delete()
+
+                    for item in formset.save(commit=False):
+                        item.purchase = purchase
+                        item.save()
+
+                messages.success(
+                    request,
+                    'Purchase saved as a draft.',
+                )
+                return redirect('purchase_list')
+    else:
+        form = PurchaseForm(
+            instance=purchase,
+            business=business,
+        )
+        formset = PurchaseItemFormSet(
+            instance=purchase,
+            form_kwargs={'business': business},
+        )
+
+    return render(
+        request,
+        'inventory/purchase_form.html',
+        {
+            'form': form,
+            'formset': formset,
+        },
+    )
+
+
+
+@login_required
+def purchase_list(request):
+    business = request.user.userprofile.business
+
+    purchases = (
+        Purchase.objects
+        .filter(business=business)
+        .select_related('supplier', 'location')
+        .prefetch_related('items__product')
+        .order_by('-created_at')
+    )
+
+    return render(
+        request,
+        'inventory/purchase_list.html',
+        {
+            'purchases': purchases,
+        },
+    )
+

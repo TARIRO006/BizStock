@@ -1,0 +1,75 @@
+
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <p class="page-label">INVENTORY MANAGEMENT</p>
+        <h1>Purchases</h1>
+        <p class="page-description">
+            Track purchases from suppliers and monitor their status.
+        </p>
+    </div>
+
+    <a href="{% url 'purchase_create' %}" class="primary-button">
+        <i class="fa-solid fa-plus"></i>
+        Record Purchase
+    </a>
+</div>
+
+<div class="dashboard-panel">
+    <div class="panel-header">
+        <h2>Purchase Records</h2>
+    </div>
+
+    {% if purchases %}
+        <div class="table-responsive">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Reference</th>
+                        <th>Supplier</th>
+                        <th>Delivery Location</th>
+                        <th>Total Cost</th>
+                        <th>Date Created</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for purchase in purchases %}
+                        <tr>
+                            <td>
+                                <strong>
+                                    {{ purchase.reference|default:"PUR-" }}{% if not purchase.reference %}{{ purchase.pk }}{% endif %}
+                                </strong>
+                            </td>
+                            <td>{{ purchase.supplier.name }}</td>
+                            <td>{{ purchase.location.name }}</td>
+                            <td>
+                                {{ purchase.total_cost|floatformat:2 }}
+                            </td>
+                            <td>
+                                {{ purchase.created_at|date:"d M Y" }}
+                            </td>
+                            <td>
+                                <span class="status-badge {% if purchase.status == 'received' %}active{% elif purchase.status == 'cancelled' %}inactive{% endif %}">
+                                    {{ purchase.get_status_display }}
+                                </span>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <h3>No purchases recorded yet</h3>
+            <p>Record your first purchase to start tracking supplier orders.</p>
+            <a href="{% url 'purchase_create' %}" class="primary-button">
+                Record First Purchase
+            </a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

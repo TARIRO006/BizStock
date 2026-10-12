@@ -1,6 +1,7 @@
 from django import forms
-
-from .models import Product, Category
+from django.forms import inlineformset_factory
+from shops.models import Location
+from .models import Product, Category, Supplier, Purchase, PurchaseItem
 
 
 class ProductForm(forms.ModelForm):
@@ -99,3 +100,136 @@ class CategoryForm(forms.ModelForm):
                 'class': 'form-input',
             }),
         }
+
+
+
+class SupplierForm(forms.ModelForm):
+
+    class Meta:
+        model = Supplier
+
+        fields = [
+            'name',
+            'contact_person',
+            'email',
+            'phone',
+            'address',
+            'notes',
+            'is_active',
+        ]
+
+        widgets = {
+
+            'name': forms.TextInput(attrs={
+                'class': 'form-input',
+                'placeholder': 'e.g. ABC Packaging Supplies',
+            }),
+
+            'contact_person': forms.TextInput(attrs={
+                'class': 'form-input',
+                'placeholder': "Contact person's name",
+            }),
+
+            'email': forms.EmailInput(attrs={
+                'class': 'form-input',
+                'placeholder': 'supplier@example.com',
+            }),
+
+            'phone': forms.TextInput(attrs={
+                'class': 'form-input',
+                'placeholder': '+265 ...',
+            }),
+
+            'address': forms.Textarea(attrs={
+                'class': 'form-input',
+                'rows': 3,
+                'placeholder': 'Supplier address...',
+            }),
+
+            'notes': forms.Textarea(attrs={
+                'class': 'form-input',
+                'rows': 3,
+                'placeholder': 'Additional information...',
+            }),
+
+            'is_active': forms.CheckboxInput(attrs={
+                'class': 'form-checkbox',
+            }),
+                
+        }
+
+
+
+class PurchaseForm(forms.ModelForm):
+    class Meta:
+        model = Purchase
+        fields = ['supplier', 'location', 'reference', 'notes']
+
+        widgets = {
+            'supplier': forms.Select(attrs={'class': 'form-input'}),
+            'location': forms.Select(attrs={'class': 'form-input'}),
+            'reference': forms.TextInput(attrs={
+                'class': 'form-input',
+                'placeholder': 'e.g. PUR-001',
+            }),
+            'notes': forms.Textarea(attrs={
+                'class': 'form-input',
+                'rows': 3,
+                'placeholder': 'Optional purchase notes',
+            }),
+        }
+
+    def __init__(self, *args, business=None, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        if business is not None:
+            self.fields['supplier'].queryset = Supplier.objects.filter(
+                business=business,
+                is_active=True,
+            )
+            self.fields['location'].queryset = Location.objects.filter(
+                business=business,
+                is_active=True,
+            )
+
+
+
+
+class PurchaseItemForm(forms.ModelForm):
+    class Meta:
+        model = PurchaseItem
+        fields = ['product', 'quantity', 'unit_cost']
+
+        widgets = {
+            'product': forms.Select(attrs={'class': 'form-input'}),
+            'quantity': forms.NumberInput(attrs={
+                'class': 'form-input',
+                'step': '0.01',
+                'min': '0.01',
+            }),
+            'unit_cost': forms.NumberInput(attrs={
+                'class': 'form-input',
+                'step': '0.01',
+                'min': '0',
+            }),
+        }
+
+    def __init__(self, *args, business=None, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        if business is not None:
+            self.fields['product'].queryset = Product.objects.filter(
+                business=business,
+                is_active=True,
+            )
+
+
+PurchaseItemFormSet = inlineformset_factory(
+    Purchase,
+    PurchaseItem,
+    form=PurchaseItemForm,
+    extra=1,
+    can_delete=True,
+)
+
+        
