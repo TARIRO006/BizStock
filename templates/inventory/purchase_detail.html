@@ -1,0 +1,144 @@
+
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <p class="page-label">INVENTORY MANAGEMENT</p>
+        <h1>Purchase Details</h1>
+        <p class="page-description">
+            Review the supplier order and purchased items.
+        </p>
+    </div>
+
+    <a href="{% url 'purchase_list' %}" class="secondary-button">
+        <i class="fa-solid fa-arrow-left"></i>
+        Back to Purchases
+    </a>
+</div>
+
+{% if messages %}
+    {% for message in messages %}
+        <div class="dashboard-panel" role="status">
+            {{ message }}
+        </div>
+    {% endfor %}
+{% endif %}
+
+<div class="dashboard-panel">
+    <div class="panel-header">
+        <h2>
+            {{ purchase.reference|default:"Purchase" }}
+            {% if not purchase.reference %}#{{ purchase.pk }}{% endif %}
+        </h2>
+
+        <span class="status-badge {% if purchase.status == 'received' %}active{% elif purchase.status == 'cancelled' %}inactive{% endif %}">
+            {{ purchase.get_status_display }}
+        </span>
+    </div>
+
+    <div class="form-grid">
+        <div class="form-group">
+            <label>Supplier</label>
+            <p>{{ purchase.supplier.name }}</p>
+        </div>
+
+        <div class="form-group">
+            <label>Delivery Location</label>
+            <p>{{ purchase.location.name }}</p>
+        </div>
+
+        <div class="form-group">
+            <label>Date Created</label>
+            <p>{{ purchase.created_at|date:"d M Y, H:i" }}</p>
+        </div>
+
+        <div class="form-group">
+            <label>Received At</label>
+            <p>
+                {% if purchase.received_at %}
+                    {{ purchase.received_at|date:"d M Y, H:i" }}
+                {% else %}
+                    Not received
+                {% endif %}
+            </p>
+        </div>
+
+        <div class="form-group">
+            <label>Created By</label>
+            <p>{{ purchase.created_by|default:"Unknown" }}</p>
+        </div>
+
+        <div class="form-group">
+            <label>Notes</label>
+            <p>{{ purchase.notes|default:"No notes provided."|linebreaksbr }}</p>
+        </div>
+    </div>
+</div>
+
+<div class="dashboard-panel">
+    <div class="panel-header">
+        <h2>Purchased Items</h2>
+    </div>
+
+    <div class="table-responsive">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Product</th>
+                    <th>Quantity</th>
+                    <th>Unit Cost</th>
+                    <th>Line Total</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for item in items %}
+                    <tr>
+                        <td>{{ item.product.name }}</td>
+                        <td>{{ item.quantity|floatformat:2 }}</td>
+                        <td>{{ item.unit_cost|floatformat:2 }}</td>
+                        <td>{{ item.line_total|floatformat:2 }}</td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="4">No items on this purchase.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+
+            <tfoot>
+                <tr>
+                    <th colspan="3">Total Cost</th>
+                    <th>{{ purchase.total_cost|floatformat:2 }}</th>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+</div>
+
+{% if purchase.status == 'draft' %}
+    <div class="form-actions">
+        <form method="post"
+              action="{% url 'purchase_receive' purchase.id %}"
+              onsubmit="return confirm('Receive this purchase and update stock?');">
+            {% csrf_token %}
+            <button type="submit" class="primary-button">
+                <i class="fa-solid fa-box-open"></i>
+                Receive Purchase
+            </button>
+        </form>
+
+        <form method="post"
+              action="{% url 'purchase_cancel' purchase.id %}"
+              onsubmit="return confirm('Cancel this draft purchase? This cannot be undone.');">
+            {% csrf_token %}
+            <button type="submit" class="danger-button">
+                <i class="fa-solid fa-ban"></i>
+                Cancel Purchase
+            </button>
+        </form>
+    </div>
+{% endif %}
+
+{% endblock %}

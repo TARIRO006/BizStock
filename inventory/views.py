@@ -2,6 +2,7 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.db import transaction
+from .services import receive_purchase
 
 from .models import Product, Category, Supplier,  Purchase
 from .forms import ProductForm, CategoryForm, SupplierForm, PurchaseForm, PurchaseItemFormSet
@@ -428,4 +429,98 @@ def purchase_list(request):
             'purchases': purchases,
         },
     )
+
+
+
+@login_required
+def purchase_receive(request, purchase_id):
+    if request.method != 'POST':
+        return redirect('purchase_list')
+
+    business = request.user.userprofile.business
+
+    try:
+        purchase = receive_purchase(
+            purchase_id=purchase_id,
+            business=business,
+            user=request.user,
+        )
+    except Purchase.DoesNotExist:
+        messages.error(request, 'Purchase not found.')
+        return redirect('purchase_list')
+    except ValueError as error:
+        messages.error(request, str(error))
+        return redirect('purchase_list')
+
+    messages.success(
+        request,
+        f'Purchase {purchase.reference or purchase.pk} received successfully. Stock has been updated.',
+    )
+
+    return redirect('purchase_list')
+
+
+
+@login_required
+def purchase_detail(request, purchase_id):
+    business = request.user.userprofile.business
+
+    purchase = get_object_or_404(
+        Purchase.objects.select_related(
+            'supplier',
+            'location',
+            'created_by',
+        ).prefetch_related('items__product'),
+        id=purchase_id,
+        business=business,
+    )
+
+    return render(
+        request,
+        'inventory/purchase_detail.html',
+        {
+            'purchase': purchase,
+            'items': purchase.items.all(),
+        },
+    )
+
+
+
+@login_required
+def purchase_cancel(request, purchase_id):
+    if request.method != 'POST':
+        return redirect('purchase_list')
+
+    business = request.user.userprofile.business
+
+    purchase = get_object_or_404(
+        Purchase,
+        id=purchase_id,
+        business=business,
+    )
+
+    if purchase.status != 'draft':
+        messages.error(
+            request,
+            'Only draft purchases can be cancelled.',
+        )
+        return redirect(
+            'purchase_detail',
+            purchase_id=purchase.id,
+        )
+
+    purchase.status = 'cancelled'
+    purchase.save(update_fields=['status'])
+
+    messages.success(
+        request,
+        f'Purchase {purchase.reference or purchase.pk} was cancelled.',
+    )
+
+    return redirect(
+        'purchase_detail',
+        purchase_id=purchase.id,
+    )
+
+
 

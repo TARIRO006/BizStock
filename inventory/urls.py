@@ -16,4 +16,7 @@ urlpatterns = [
     path('suppliers/<int:supplier_id>/edit/', views.supplier_edit, name='supplier_edit'),
     path('purchases/add/', views.purchase_create, name='purchase_create'),
     path('purchases/', views.purchase_list, name='purchase_list'),
+    path('purchases/<int:purchase_id>/receive/', views.purchase_receive, name='purchase_receive'),
+    path('purchases/<int:purchase_id>/', views.purchase_detail, name='purchase_detail'),
+    path('purchases/<int:purchase_id>/cancel/', views.purchase_cancel, name='purchase_cancel'),
 ]
