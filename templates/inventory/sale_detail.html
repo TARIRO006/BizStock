@@ -1,0 +1,170 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="sale-detail-page">
+
+    <div class="page-header sale-detail-header">
+        <div>
+            <h1>Sale Details</h1>
+            <p>Review this transaction, product costs and gross profit.</p>
+        </div>
+
+        <a href="{% url 'sale_list' %}" class="secondary-button">
+            <i class="fa-solid fa-arrow-left"></i>
+            Back to Sales
+        </a>
+    </div>
+
+    <!-- Financial summary -->
+    <div class="sale-summary-grid">
+
+        <div class="sale-summary-card revenue-card">
+            <div class="sale-summary-icon">
+                <i class="fa-solid fa-money-bill-wave"></i>
+            </div>
+            <div>
+                <span>Total Revenue</span>
+                <h2>{{ sale.total_amount|floatformat:2 }}</h2>
+            </div>
+        </div>
+
+        <div class="sale-summary-card cost-card">
+            <div class="sale-summary-icon">
+                <i class="fa-solid fa-boxes-stacked"></i>
+            </div>
+            <div>
+                <span>Product Cost</span>
+                <h2>{{ sale.total_cost|floatformat:2 }}</h2>
+            </div>
+        </div>
+
+        <div class="sale-summary-card profit-card">
+            <div class="sale-summary-icon">
+                <i class="fa-solid fa-chart-line"></i>
+            </div>
+            <div>
+                <span>Gross Profit</span>
+                <h2>{{ sale.gross_profit|floatformat:2 }}</h2>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Transaction information -->
+    <div class="sale-detail-card">
+        <div class="sale-section-heading">
+            <div>
+                <h2>Sale Information</h2>
+                <p>Transaction reference and details</p>
+            </div>
+
+            <span class="sale-status status-{{ sale.status }}">
+                {{ sale.get_status_display }}
+            </span>
+        </div>
+
+        <div class="sale-information-grid">
+
+            <div class="sale-info-item">
+                <span class="sale-info-label">Reference</span>
+                <strong>{{ sale.reference|default:"Not assigned" }}</strong>
+            </div>
+
+            <div class="sale-info-item">
+                <span class="sale-info-label">Shop</span>
+                <strong>{{ sale.location.name }}</strong>
+            </div>
+
+            <div class="sale-info-item">
+                <span class="sale-info-label">Created Date</span>
+                <strong>{{ sale.created_at|date:"d M Y, H:i" }}</strong>
+            </div>
+
+            <div class="sale-info-item">
+                <span class="sale-info-label">Completed Date</span>
+                <strong>
+                    {% if sale.completed_at %}
+                        {{ sale.completed_at|date:"d M Y, H:i" }}
+                    {% else %}
+                        Not completed
+                    {% endif %}
+                </strong>
+            </div>
+
+            <div class="sale-info-item sale-notes-item">
+                <span class="sale-info-label">Notes</span>
+                <p>{{ sale.notes|default:"No notes provided."|linebreaksbr }}</p>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Products table -->
+    <div class="sale-detail-card">
+        <div class="sale-section-heading">
+            <div>
+                <h2>Products Sold</h2>
+                <p>Items and financial breakdown for this transaction</p>
+            </div>
+
+            <span class="sale-item-count">
+                {{ sale.items.count }} item{{ sale.items.count|pluralize }}
+            </span>
+        </div>
+
+        <div class="sale-table-wrapper">
+            <table class="sale-products-table">
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th>Quantity</th>
+                        <th>Unit Price</th>
+                        <th>Unit Cost</th>
+                        <th>Line Total</th>
+                        <th>Gross Profit</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for item in sale.items.all %}
+                    <tr>
+                        <td>
+                            <div class="sale-product-name">
+                                {{ item.product.name }}
+                            </div>
+                        </td>
+
+                        <td>{{ item.quantity|floatformat:2 }}</td>
+                        <td>{{ item.unit_price|floatformat:2 }}</td>
+                        <td>{{ item.unit_cost|floatformat:2 }}</td>
+                        <td class="sale-money-cell">
+                            {{ item.line_total|floatformat:2 }}
+                        </td>
+                        <td class="{% if item.gross_profit < 0 %}sale-loss{% else %}sale-profit{% endif %}">
+                            {{ item.gross_profit|floatformat:2 }}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="sale-empty-state">
+                            No products have been added to this sale.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+
+                <tfoot>
+                    <tr>
+                        <th colspan="4">Total</th>
+                        <th>{{ sale.total_amount|floatformat:2 }}</th>
+                        <th class="{% if sale.gross_profit < 0 %}sale-loss{% else %}sale-profit{% endif %}">
+                            {{ sale.gross_profit|floatformat:2 }}
+                        </th>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

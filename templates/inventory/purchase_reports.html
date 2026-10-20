@@ -1,0 +1,123 @@
+
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <p class="page-label">BUSINESS ANALYTICS</p>
+        <h1>Purchase Reports</h1>
+        <p class="page-description">
+            Review purchasing expenditure and supplier activity.
+        </p>
+    </div>
+</div>
+
+<div class="form-grid">
+    <div class="dashboard-panel">
+        <p class="page-description">Total Received Spending</p>
+        <h2>{{ total_spending|floatformat:2 }}</h2>
+        <p>Cost of received purchases</p>
+    </div>
+
+    <div class="dashboard-panel">
+        <p class="page-description">Received Purchases</p>
+        <h2>{{ received_count }}</h2>
+        <p>Completed purchases</p>
+    </div>
+
+    <div class="dashboard-panel">
+        <p class="page-description">Draft Purchases</p>
+        <h2>{{ draft_count }}</h2>
+        <p>Awaiting receipt</p>
+    </div>
+</div>
+
+<div class="dashboard-panel">
+    <div class="panel-header">
+        <h2>Spending by Supplier</h2>
+    </div>
+
+    <div class="table-responsive">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Supplier</th>
+                    <th>Received Purchases</th>
+                    <th>Total Spending</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for supplier in supplier_spending %}
+                    <tr>
+                        <td>{{ supplier.supplier__name }}</td>
+                        <td>{{ supplier.purchase_count }}</td>
+                        <td>
+                            {{ supplier.total_spending|default:0|floatformat:2 }}
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="3">
+                            No received purchases to report yet.
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="dashboard-panel">
+    <div class="panel-header">
+        <h2>Received Purchase History</h2>
+    </div>
+
+    <div class="table-responsive">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Reference</th>
+                    <th>Supplier</th>
+                    <th>Location</th>
+                    <th>Received Date</th>
+                    <th>Total Cost</th>
+                    <th>Details</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for purchase in received_purchases %}
+                    <tr>
+                        <td>
+                            {{ purchase.reference|default:"PUR-" }}{% if not purchase.reference %}{{ purchase.pk }}{% endif %}
+                        </td>
+                        <td>{{ purchase.supplier.name }}</td>
+                        <td>{{ purchase.location.name }}</td>
+                        <td>
+                            {% if purchase.received_at %}
+                                {{ purchase.received_at|date:"d M Y" }}
+                            {% else %}
+                                —
+                            {% endif %}
+                        </td>
+                        <td>{{ purchase.total_cost|floatformat:2 }}</td>
+                        <td>
+                            <a href="{% url 'purchase_detail' purchase.id %}"
+                               class="table-action">
+                                View
+                            </a>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="6">
+                            No received purchases yet.
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

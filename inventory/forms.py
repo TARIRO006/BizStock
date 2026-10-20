@@ -1,7 +1,7 @@
 from django import forms
 from django.forms import inlineformset_factory
 from shops.models import Location
-from .models import Product, Category, Supplier, Purchase, PurchaseItem
+from .models import Product, Category, Supplier, Purchase, PurchaseItem, Sale, SaleItem
 
 
 class ProductForm(forms.ModelForm):
@@ -228,6 +228,80 @@ PurchaseItemFormSet = inlineformset_factory(
     Purchase,
     PurchaseItem,
     form=PurchaseItemForm,
+    extra=1,
+    can_delete=True,
+)
+
+
+
+class SaleForm(forms.ModelForm):
+    class Meta:
+        model = Sale
+        fields = ['location', 'reference', 'notes']
+
+        widgets = {
+            'location': forms.Select(attrs={'class': 'form-input'}),
+            'reference': forms.TextInput(attrs={
+                'class': 'form-input',
+                'placeholder': 'e.g. SALE-001',
+            }),
+            'notes': forms.Textarea(attrs={
+                'class': 'form-input',
+                'rows': 3,
+                'placeholder': 'Optional sale notes',
+            }),
+        }
+
+    def __init__(self, *args, business=None, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.fields['location'].queryset = Location.objects.none()
+
+        if business is not None:
+            self.fields['location'].queryset = Location.objects.filter(
+                business=business,
+                location_type='shop',
+                is_active=True,
+            )
+
+
+
+
+class SaleItemForm(forms.ModelForm):
+    class Meta:
+        model = SaleItem
+        fields = ['product', 'quantity', 'unit_price']
+
+        widgets = {
+            'product': forms.Select(attrs={'class': 'form-input'}),
+            'quantity': forms.NumberInput(attrs={
+                'class': 'form-input',
+                'step': '0.01',
+                'min': '0.01',
+            }),
+            'unit_price': forms.NumberInput(attrs={
+                'class': 'form-input',
+                'step': '0.01',
+                'min': '0',
+            }),
+        }
+
+    def __init__(self, *args, business=None, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.fields['product'].queryset = Product.objects.none()
+
+        if business is not None:
+            self.fields['product'].queryset = Product.objects.filter(
+                business=business,
+                is_active=True,
+            )
+
+
+SaleItemFormSet = inlineformset_factory(
+    Sale,
+    SaleItem,
+    form=SaleItemForm,
     extra=1,
     can_delete=True,
 )

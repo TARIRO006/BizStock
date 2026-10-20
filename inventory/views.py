@@ -2,10 +2,15 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.db import transaction
-from .services import receive_purchase
+from .services import receive_purchase, complete_sale
+from django.db.models import Sum, Count, Q, F, DecimalField, ExpressionWrapper
+from django.db.models.functions import Coalesce
+from decimal import Decimal
+from django.views.decorators.http import require_POST
 
-from .models import Product, Category, Supplier,  Purchase
-from .forms import ProductForm, CategoryForm, SupplierForm, PurchaseForm, PurchaseItemFormSet
+
+from .models import Product, Category, Supplier,  Purchase, Sale, SaleItem
+from .forms import ProductForm, CategoryForm, SupplierForm, PurchaseForm, PurchaseItemFormSet, SaleForm, SaleItemFormSet
 
 
 @login_required
@@ -524,3 +529,199 @@ def purchase_cancel(request, purchase_id):
 
 
 
+@login_required
+def purchase_reports(request):
+    business = request.user.userprofile.business
+
+    received_purchases = (
+        Purchase.objects
+        .filter(business=business, status='received')
+        .select_related('supplier', 'location')
+        .prefetch_related('items')
+        .order_by('-received_at')
+    )
+
+    line_total_expression = ExpressionWrapper(
+        F('items__quantity') * F('items__unit_cost'),
+        output_field=DecimalField(max_digits=24, decimal_places=2),
+    )
+
+    spending = received_purchases.aggregate(
+        total=Sum(line_total_expression)
+    )['total'] or Decimal('0.00')
+
+    received_count = Purchase.objects.filter(
+        business=business,
+        status='received',
+    ).count()
+
+    draft_count = Purchase.objects.filter(
+        business=business,
+        status='draft',
+    ).count()
+
+    # Group spending by supplier.
+    supplier_spending = (
+        Purchase.objects
+        .filter(business=business, status='received')
+        .values('supplier_id', 'supplier__name')
+        .annotate(
+            total_spending=Sum(line_total_expression),
+            purchase_count=Count('id', distinct=True),
+        )
+        .order_by('-total_spending')
+    )
+
+    context = {
+        'total_spending': spending,
+        'received_count': received_count,
+        'draft_count': draft_count,
+        'supplier_spending': supplier_spending,
+        'received_purchases': received_purchases,
+    }
+
+    return render(
+        request,
+        'inventory/purchase_reports.html',
+        context,
+    )
+
+
+
+@login_required
+def sale_create(request):
+    business = request.user.userprofile.business
+    sale = Sale(business=business)
+
+    if request.method == 'POST':
+        form = SaleForm(
+            request.POST,
+            instance=sale,
+            business=business,
+        )
+
+        formset = SaleItemFormSet(
+            request.POST,
+            instance=sale,
+            form_kwargs={'business': business},
+        )
+
+        if form.is_valid() and formset.is_valid():
+            item_forms = [
+                item_form
+                for item_form in formset.forms
+                if item_form.cleaned_data
+                and not item_form.cleaned_data.get('DELETE', False)
+                and item_form.cleaned_data.get('product')
+            ]
+
+            if not item_forms:
+                messages.error(
+                    request,
+                    'Add at least one product to the sale.',
+                )
+            else:
+                with transaction.atomic():
+                    sale = form.save(commit=False)
+                    sale.business = business
+                    sale.created_by = request.user
+                    sale.status = 'draft'
+                    sale.save()
+
+                    formset.instance = sale
+                    items = formset.save(commit=False)
+
+                    for item in items:
+                        item.sale = sale
+                        item.unit_cost = item.product.cost_price
+                        item.save()
+
+                    formset.save_m2m()
+
+                messages.success(
+                    request,
+                    'Sale saved as a draft. Stock has not changed.',
+                )
+                return redirect('sale_list')
+    else:
+        form = SaleForm(business=business)
+        formset = SaleItemFormSet(
+            instance=sale,
+            form_kwargs={'business': business},
+        )
+
+    return render(
+        request,
+        'inventory/sale_form.html',
+        {
+            'form': form,
+            'formset': formset,
+        },
+    )
+
+
+
+
+@login_required
+def sale_list(request):
+    business = request.user.userprofile.business
+
+    sales = (
+        Sale.objects
+        .filter(business=business)
+        .select_related('location', 'created_by')
+        .prefetch_related('items__product')
+        .order_by('-created_at')
+    )
+
+    return render(
+        request,
+        'inventory/sale_list.html',
+        {'sales': sales},
+    )
+
+
+
+@login_required
+@require_POST
+def sale_complete(request, sale_id):
+    business = request.user.userprofile.business
+
+    try:
+        sale = complete_sale(
+            sale_id=sale_id,
+            business=business,
+            user=request.user,
+        )
+    except Sale.DoesNotExist:
+        messages.error(request, 'Sale not found.')
+        return redirect('sale_list')
+    except ValueError as error:
+        messages.error(request, str(error))
+        return redirect('sale_list')
+
+    messages.success(
+        request,
+        f'Sale {sale.reference or "#" + str(sale.pk)} completed successfully. '
+        'Stock has been updated.',
+    )
+    return redirect('sale_list')
+
+
+
+@login_required
+def sale_detail(request, sale_id):
+    business = request.user.userprofile.business
+
+    sale = get_object_or_404(
+        Sale.objects.filter(business=business)
+        .select_related('location', 'created_by')
+        .prefetch_related('items__product'),
+        pk=sale_id,
+    )
+
+    return render(
+        request,
+        'inventory/sale_detail.html',
+        {'sale': sale},
+    )

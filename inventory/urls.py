@@ -19,4 +19,9 @@ urlpatterns = [
     path('purchases/<int:purchase_id>/receive/', views.purchase_receive, name='purchase_receive'),
     path('purchases/<int:purchase_id>/', views.purchase_detail, name='purchase_detail'),
     path('purchases/<int:purchase_id>/cancel/', views.purchase_cancel, name='purchase_cancel'),
+    path('purchase-reports/', views.purchase_reports, name='purchase_reports'),
+    path('sales/', views.sale_list, name='sale_list'),
+    path('sales/add/', views.sale_create, name='sale_create'),
+    path('sales/<int:sale_id>/complete/', views.sale_complete, name='sale_complete'),
+    path('sales/<int:sale_id>/', views.sale_detail, name='sale_detail'),
 ]

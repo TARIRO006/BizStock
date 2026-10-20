@@ -2,7 +2,7 @@
 from django.db import transaction
 from django.utils import timezone
 
-from .models import Purchase
+from .models import Purchase, Sale
 from shops.services import create_stock_movement
 
 
@@ -63,3 +63,60 @@ def receive_purchase(*, purchase_id, business, user=None):
     purchase.save(update_fields=['status', 'received_at'])
 
     return purchase
+
+
+
+@transaction.atomic
+def complete_sale(*, sale_id, business, user=None):
+    # Lock the sale so two requests cannot complete it simultaneously.
+    sale = Sale.objects.select_for_update().get(
+        pk=sale_id,
+        business=business,
+    )
+
+    if sale.status != 'draft':
+        raise ValueError(
+            'Only draft sales can be completed.'
+        )
+
+    items = list(
+        sale.items.select_related('product').all()
+    )
+
+    if not items:
+        raise ValueError(
+            'Cannot complete a sale without products.'
+        )
+
+    # Validate all products before processing stock movements.
+    for item in items:
+        if item.product.business_id != business.pk:
+            raise ValueError(
+                'A sale contains a product from another business.'
+            )
+
+    if sale.location.business_id != business.pk:
+        raise ValueError(
+            'The selected shop does not belong to this business.'
+        )
+
+    # Each movement deducts stock and creates a stock history record.
+    # If any movement fails, the entire transaction rolls back.
+    for item in items:
+        create_stock_movement(
+            business=business,
+            product=item.product,
+            location=sale.location,
+            movement_type='sale',
+            quantity=item.quantity,
+            user=user,
+            reference=sale.reference or f'SALE-{sale.pk}',
+            notes=f'Sale #{sale.pk} completed.',
+        )
+
+    sale.status = 'completed'
+    sale.completed_at = timezone.now()
+    sale.save(update_fields=['status', 'completed_at'])
+
+    return sale
+

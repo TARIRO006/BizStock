@@ -1,205 +1,260 @@
+
 {% extends 'base.html' %}
 
 {% block title %}
     Dashboard | BizStock
 {% endblock %}
 
-
 {% block content %}
 
 <div class="dashboard-header">
-
     <div>
-        <p class="page-label">
-            BUSINESS OVERVIEW
-        </p>
+        <p class="page-label">BUSINESS OVERVIEW</p>
 
         <h1>
-            Welcome back, {{ request.user.first_name }} 👋
+            Welcome back, {{ request.user.first_name|default:request.user.username }} 👋
         </h1>
 
         <p class="page-description">
-            Here's what's happening with
-            {{ business.name }} today.
+            Here's what's happening with {{ business.name }} today.
         </p>
     </div>
-
 </div>
 
-
-<!-- Dashboard Cards -->
-
+<!-- Dashboard statistics -->
 <div class="dashboard-cards">
 
     <div class="stat-card">
-
         <div class="stat-icon blue">
             <i class="fa-solid fa-box"></i>
         </div>
-
         <div>
             <p>Total Products</p>
-            <h2>0</h2>
+            <h2>{{ product_count }}</h2>
         </div>
-
     </div>
 
-
     <div class="stat-card">
-
         <div class="stat-icon green">
             <i class="fa-solid fa-money-bill"></i>
         </div>
-
         <div>
             <p>Today's Sales</p>
-            <h2>MK 0</h2>
+            <h2>MK {{ todays_revenue|floatformat:2 }}</h2>
         </div>
-
     </div>
 
-
     <div class="stat-card">
-
         <div class="stat-icon orange">
             <i class="fa-solid fa-triangle-exclamation"></i>
         </div>
-
         <div>
             <p>Low Stock</p>
-            <h2>0</h2>
+            <h2>{{ low_stock_count }}</h2>
         </div>
-
     </div>
 
-
     <div class="stat-card">
-
         <div class="stat-icon purple">
             <i class="fa-solid fa-store"></i>
         </div>
-
         <div>
-            <p>Shops</p>
-            <h2>0</h2>
+            <p>Active Shops</p>
+            <h2>{{ shop_count }}</h2>
         </div>
-
     </div>
 
 </div>
 
-
-<!-- Main Dashboard Grid -->
-
+<!-- Main dashboard grid -->
 <div class="dashboard-grid">
 
-
-    <!-- Sales Overview -->
-
+    <!-- Sales overview -->
     <div class="dashboard-panel sales-panel">
 
         <div class="panel-header">
-
             <div>
                 <h2>Sales Overview</h2>
-                <p>Your sales performance</p>
+                <p>Revenue and gross profit for the selected period</p>
             </div>
 
-            <select>
-                <option>This Week</option>
-                <option>This Month</option>
-                <option>This Year</option>
-            </select>
-
+            <form method="get" class="dashboard-period-form">
+                <label for="period">Reporting period</label>
+                <select id="period" name="period" onchange="this.form.submit()">
+                    <option value="today" {% if period == 'today' %}selected{% endif %}>
+                        Today
+                    </option>
+                    <option value="7" {% if period == '7' %}selected{% endif %}>
+                        Last 7 days
+                    </option>
+                    <option value="30" {% if period == '30' %}selected{% endif %}>
+                        Last 30 days
+                    </option>
+                    <option value="all" {% if period == 'all' %}selected{% endif %}>
+                        All time
+                    </option>
+                </select>
+            </form>
         </div>
 
-        <div class="chart-placeholder">
+        <div class="dashboard-sales-summary">
+            <div>
+                <p>Total Revenue</p>
+                <h2>MK {{ total_revenue|floatformat:2 }}</h2>
+            </div>
 
-            <i class="fa-solid fa-chart-line"></i>
+            <div>
+                <p>Gross Profit</p>
+                <h2>MK {{ gross_profit|floatformat:2 }}</h2>
+            </div>
 
-            <p>
-                Sales chart will appear here
-            </p>
-
+            <div>
+                <p>Completed Sales</p>
+                <h2>{{ completed_sales_count }}</h2>
+            </div>
         </div>
+
+        <p class="dashboard-note">
+            Gross profit is revenue minus the recorded product cost.
+            It does not include other business expenses.
+        </p>
 
     </div>
 
-
-    <!-- Quick Actions -->
-
+    <!-- Quick actions -->
     <div class="dashboard-panel">
 
         <div class="panel-header">
-
             <div>
                 <h2>Quick Actions</h2>
                 <p>Common tasks</p>
             </div>
-
         </div>
-
 
         <div class="quick-actions">
 
-            <a href="#" class="quick-action">
+            <a href="{% url 'product_create' %}" class="quick-action">
                 <i class="fa-solid fa-plus"></i>
                 <span>Add Product</span>
             </a>
 
-            <a href="#" class="quick-action">
+            <a href="{% url 'purchase_create' %}" class="quick-action">
                 <i class="fa-solid fa-cart-plus"></i>
                 <span>Record Purchase</span>
             </a>
 
-            <a href="#" class="quick-action">
+            <a href="{% url 'sale_create' %}" class="quick-action">
                 <i class="fa-solid fa-cash-register"></i>
                 <span>Record Sale</span>
             </a>
 
-            <a href="#" class="quick-action">
+            <a href="{% url 'supplier_create' %}" class="quick-action">
                 <i class="fa-solid fa-truck"></i>
                 <span>Add Supplier</span>
             </a>
 
         </div>
-
     </div>
 
 </div>
 
-
-<!-- Low Stock -->
-
-<div class="dashboard-panel">
+<!-- Low stock items -->
+<div class="dashboard-panel dashboard-section">
 
     <div class="panel-header">
-
         <div>
             <h2>Low Stock Items</h2>
             <p>Products that may need restocking</p>
         </div>
 
-        <a href="#" class="view-all">
-            View Inventory
-        </a>
-
+        <span class="low-stock-badge">
+            {{ low_stock_count }} item{{ low_stock_count|pluralize }}
+        </span>
     </div>
 
+    {% if low_stock_items %}
+        <div class="dashboard-table-wrapper">
+            <table class="dashboard-table">
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th>SKU</th>
+                        <th>Available Stock</th>
+                        <th>Minimum Stock</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
 
-    <div class="empty-state">
+                <tbody>
+                    {% for item in low_stock_items %}
+                        <tr>
+                            <td>{{ item.product.name }}</td>
+                            <td>{{ item.product.sku|default:"—" }}</td>
+                            <td>{{ item.quantity|floatformat:2 }}</td>
+                            <td>{{ item.product.minimum_stock|floatformat:2 }}</td>
+                            <td>
+                                {% if item.quantity <= 0 %}
+                                    <span class="stock-status out-of-stock">
+                                        Out of stock
+                                    </span>
+                                {% else %}
+                                    <span class="stock-status low">
+                                        Low stock
+                                    </span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <i class="fa-solid fa-box-open"></i>
+            <h3>No low-stock items</h3>
+            <p>Your active products are above their minimum stock levels.</p>
+        </div>
+    {% endif %}
 
-        <i class="fa-solid fa-box-open"></i>
+</div>
 
-        <h3>
-            No low-stock items
-        </h3>
+<!-- Shop performance -->
+<div class="dashboard-panel dashboard-section">
 
-        <p>
-            Your low-stock products will appear here.
-        </p>
-
+    <div class="panel-header">
+        <div>
+            <h2>Shop Performance</h2>
+            <p>Revenue by shop for the selected reporting period</p>
+        </div>
     </div>
+
+    {% if top_shops %}
+        <div class="dashboard-table-wrapper">
+            <table class="dashboard-table">
+                <thead>
+                    <tr>
+                        <th>Shop</th>
+                        <th>Revenue</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for shop in top_shops %}
+                        <tr>
+                            <td>{{ shop.name }}</td>
+                            <td>MK {{ shop.revenue|floatformat:2 }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <i class="fa-solid fa-store"></i>
+            <h3>No shop sales yet</h3>
+            <p>Completed sales made at your shops will appear here.</p>
+        </div>
+    {% endif %}
 
 </div>
 

@@ -251,3 +251,129 @@ class PurchaseItem(models.Model):
     def __str__(self):
         return f'{self.product.name} - {self.quantity}'
 
+
+
+class Sale(models.Model):
+    STATUS_CHOICES = [
+        ('draft', 'Draft'),
+        ('completed', 'Completed'),
+        ('cancelled', 'Cancelled'),
+    ]
+
+    business = models.ForeignKey(
+        'businesses.Business',
+        on_delete=models.CASCADE,
+        related_name='sales',
+    )
+
+    location = models.ForeignKey(
+        'shops.Location',
+        on_delete=models.PROTECT,
+        related_name='sales',
+    )
+
+    reference = models.CharField(
+        max_length=100,
+        blank=True,
+    )
+
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default='draft',
+    )
+
+    notes = models.TextField(blank=True)
+
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='bizstock_sales',
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    completed_at = models.DateTimeField(
+        null=True,
+        blank=True,
+    )
+
+    class Meta:
+        ordering = ['-created_at']
+
+    @property
+    def total_amount(self):
+        return sum(
+            (item.line_total for item in self.items.all()),
+            start=Decimal('0.00'),
+        )
+  
+    @property
+    def total_cost(self):
+        return sum(
+            (item.line_cost for item in self.items.all()),
+            start=Decimal('0.00')
+        )
+
+    @property
+    def gross_profit(self):
+        return self.total_amount - self.total_cost
+
+    def __str__(self):
+        return self.reference or f'Sale #{self.pk}'
+
+    
+
+
+class SaleItem(models.Model):
+    sale = models.ForeignKey(
+        Sale,
+        on_delete=models.CASCADE,
+        related_name='items',
+    )
+
+    product = models.ForeignKey(
+        'inventory.Product',
+        on_delete=models.PROTECT,
+        related_name='sale_items',
+    )
+
+    quantity = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        validators=[MinValueValidator(Decimal('0.01'))],
+    )
+
+    unit_price = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        validators=[MinValueValidator(Decimal('0.00'))],
+    )
+
+    # Save the product's cost at the time of sale
+    # for future profit calculations.
+    unit_cost = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        validators=[MinValueValidator(Decimal('0.00'))],
+        default=Decimal('0.00'),
+    )
+
+    @property
+    def line_total(self):
+        return self.quantity * self.unit_price
+
+    @property
+    def line_cost(self):
+        return self.quantity * self.unit_cost
+
+    @property
+    def gross_profit(self):
+        return self.line_total - self.line_cost
+
+    def __str__(self):
+        return f'{self.product.name} - {self.quantity}'
+
+

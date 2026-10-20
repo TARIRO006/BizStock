@@ -1,0 +1,123 @@
+
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <p class="page-label">SALES MANAGEMENT</p>
+        <h1>Record Sale</h1>
+        <p class="page-description">
+            Choose a shop and enter the products sold.
+        </p>
+    </div>
+
+    <a href="{% url 'sale_list' %}" class="secondary-button">
+        Back to Sales
+    </a>
+</div>
+
+<form method="post" class="dashboard-panel">
+    {% csrf_token %}
+
+    {{ form.non_field_errors }}
+
+    <div class="panel-header">
+        <h2>Sale Details</h2>
+    </div>
+
+    <div class="form-grid">
+        {% for field in form %}
+            <div class="form-group">
+                <label for="{{ field.id_for_label }}">
+                    {{ field.label }}
+                </label>
+                {{ field }}
+                {{ field.errors }}
+            </div>
+        {% endfor %}
+    </div>
+
+    <div class="panel-header">
+        <h2>Products Sold</h2>
+    </div>
+
+    
+{{ formset.management_form }}
+{{ formset.non_form_errors }}
+
+<div id="sale-items">
+    {% for item_form in formset %}
+        <div class="form-grid purchase-item-row sale-item-row">
+            {% for hidden in item_form.hidden_fields %}
+                {{ hidden }}
+            {% endfor %}
+
+            {% for field in item_form.visible_fields %}
+                <div class="form-group">
+                    <label for="{{ field.id_for_label }}">
+                        {{ field.label }}
+                    </label>
+                    {{ field }}
+                    {{ field.errors }}
+                </div>
+            {% endfor %}
+
+            <div class="form-group">
+                {% if not forloop.first %}
+                <label>Action</label>
+                
+                    <button type="button" class="danger-button remove-sale-item">
+                        Remove
+                    </button>
+                {% endif %}
+</div>
+        </div>
+    {% endfor %}
+</div>
+
+<template id="empty-sale-item">
+    <div class="form-grid purchase-item-row sale-item-row">
+        {% for field in formset.empty_form.visible_fields %}
+            <div class="form-group">
+                <label for="{{ field.id_for_label }}">
+                    {{ field.label }}
+                </label>
+                {{ field }}
+            </div>
+        {% endfor %}
+
+        {% for hidden in formset.empty_form.hidden_fields %}
+            {{ hidden }}
+        {% endfor %}
+
+        <div class="form-group">
+            <label>Action</label>
+            <button type="button"
+                    class="danger-button remove-sale-item">
+                Remove
+            </button>
+        </div>
+    </div>
+</template>
+
+<div class="form-actions">
+    <button type="button"
+            id="add-sale-item"
+            class="secondary-button">
+        <i class="fa-solid fa-plus"></i>
+        Add Another Product
+    </button>
+</div>
+
+
+    <div class="form-actions">
+        <button type="submit" class="primary-button">
+            Save Sale Draft
+        </button>
+
+        <a href="{% url 'sale_list' %}" class="secondary-button">
+            Cancel
+        </a>
+    </div>
+</form>
+{% endblock %}

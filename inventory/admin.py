@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Category, Product, Supplier, Purchase, PurchaseItem
+from .models import Category, Product, Supplier, Purchase, PurchaseItem, Sale, SaleItem
 
 # Register your models here.
 
@@ -109,3 +109,24 @@ class PurchaseItemAdmin(admin.ModelAdmin):
         'quantity',
         'unit_cost',
     )
+
+
+class SaleItemInline(admin.TabularInline):
+    model = SaleItem
+    extra = 0
+
+
+@admin.register(Sale)
+class SaleAdmin(admin.ModelAdmin):
+    list_display = (
+        'reference',
+        'location',
+        'status',
+        'created_at',
+        'completed_at',
+    )
+
+    list_filter = ('status', 'created_at')
+    search_fields = ('reference', 'location__name')
+    inlines = [SaleItemInline]
+
