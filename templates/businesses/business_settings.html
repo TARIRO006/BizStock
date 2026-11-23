@@ -1,0 +1,161 @@
+
+{% extends 'base.html' %}
+
+{% block title %}
+    Business Settings | BizStock
+{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+    <div>
+        <p class="page-label">BUSINESS MANAGEMENT</p>
+        <h1>Business Settings</h1>
+        <p>Manage your business information and branding.</p>
+    </div>
+</div>
+
+{% if messages %}
+    {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">
+            {{ message }}
+        </div>
+    {% endfor %}
+{% endif %}
+
+<form method="POST"
+      enctype="multipart/form-data"
+      class="business-settings-form">
+
+    {% csrf_token %}
+
+    {% if form.non_field_errors %}
+        <div class="form-errors">
+            {{ form.non_field_errors }}
+        </div>
+    {% endif %}
+
+    <div class="settings-card">
+
+        <div class="settings-card-header">
+            <h2>Business Information</h2>
+            <p>Update your business contact information.</p>
+        </div>
+
+        <div class="settings-fields-grid">
+
+            <div class="form-group">
+                <label for="{{ form.name.id_for_label }}">
+                    Business Name
+                </label>
+                {{ form.name }}
+                {{ form.name.errors }}
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.business_type.id_for_label }}">
+                    Business Type
+                </label>
+                {{ form.business_type }}
+                {{ form.business_type.errors }}
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.email.id_for_label }}">
+                    Business Email
+                </label>
+                {{ form.email }}
+                {{ form.email.errors }}
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.phone.id_for_label }}">
+                    Phone Number
+                </label>
+                {{ form.phone }}
+                {{ form.phone.errors }}
+            </div>
+
+            <div class="form-group full-width">
+                <label for="{{ form.address.id_for_label }}">
+                    Business Address
+                </label>
+                {{ form.address }}
+                {{ form.address.errors }}
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="settings-card">
+
+        <div class="settings-card-header">
+            <h2>Business Branding</h2>
+            <p>Upload your business logo.</p>
+        </div>
+
+        <div class="logo-settings">
+
+            <div class="current-logo">
+
+                {% if business.logo %}
+                    <img src="{{ business.logo.url }}"
+                         alt="Business Logo">
+                {% else %}
+                    <div class="logo-placeholder">
+                        No logo uploaded
+                    </div>
+                {% endif %}
+
+            </div>
+
+            <div class="logo-upload">
+
+                <label for="{{ form.logo.id_for_label }}">
+                    Upload Business Logo
+                </label>
+
+                {{ form.logo }}
+                {{ form.logo.errors }}
+
+                <small>
+                    Recommended: PNG or JPG image.
+                </small>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="settings-card">
+
+        <div class="settings-card-header">
+            <h2>Currency Settings</h2>
+            <p>Select the default currency for your business.</p>
+        </div>
+
+        <div class="form-group">
+            <label for="{{ form.currency.id_for_label }}">
+                Business Currency
+            </label>
+
+            {{ form.currency }}
+            {{ form.currency.errors }}
+        </div>
+
+    </div>
+
+
+    <div class="settings-actions">
+        <button type="submit" class="primary-button">
+            Save Changes
+        </button>
+    </div>
+
+</form>
+
+{% endblock %}

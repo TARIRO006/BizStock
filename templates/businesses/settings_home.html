@@ -1,0 +1,83 @@
+
+{% extends 'base.html' %}
+
+{% block title %}
+    Settings | BizStock
+{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+    <div>
+        <p class="page-label">CONFIGURATION</p>
+        <h1>Settings</h1>
+        <p>Manage your business and application preferences.</p>
+    </div>
+</div>
+
+<div class="settings-overview">
+
+    <a href="{% url 'business_settings' %}" class="settings-option">
+        <div class="settings-option-icon">
+            <i class="fa-solid fa-building"></i>
+        </div>
+
+        <div class="settings-option-content">
+            <h3>Business Profile</h3>
+            <p>Manage your business name, contact details, logo and currency.</p>
+        </div>
+
+        <i class="fa-solid fa-chevron-right settings-option-arrow"></i>
+    </a>
+
+    <div class="settings-option settings-option-disabled">
+        <div class="settings-option-icon">
+            <i class="fa-solid fa-users"></i>
+        </div>
+
+        <div class="settings-option-content">
+            <h3>Users & Permissions</h3>
+            <p>Manage employees, user accounts and access permissions.</p>
+            <span>Coming soon</span>
+        </div>
+    </div>
+
+    <div class="settings-option settings-option-disabled">
+        <div class="settings-option-icon">
+            <i class="fa-solid fa-file-invoice"></i>
+        </div>
+
+        <div class="settings-option-content">
+            <h3>Sales & Invoicing</h3>
+            <p>Configure invoice numbering, payment terms and receipts.</p>
+            <span>Coming soon</span>
+        </div>
+    </div>
+
+    <div class="settings-option settings-option-disabled">
+        <div class="settings-option-icon">
+            <i class="fa-solid fa-bell"></i>
+        </div>
+
+        <div class="settings-option-content">
+            <h3>Notifications</h3>
+            <p>Manage email, WhatsApp and system notifications.</p>
+            <span>Coming soon</span>
+        </div>
+    </div>
+
+    <div class="settings-option settings-option-disabled">
+        <div class="settings-option-icon">
+            <i class="fa-solid fa-user"></i>
+        </div>
+
+        <div class="settings-option-content">
+            <h3>My Account</h3>
+            <p>Manage your personal details and password.</p>
+            <span>Coming soon</span>
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}

@@ -1,98 +1,160 @@
+
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <title>Create Account | BizStock</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
 </head>
 
-<body>
+<body class="auth-page">
 
-    <h1>Create your BizStock account</h1>
+    <main class="auth-layout">
 
-    <p>Start managing your business today.</p>
+        <section class="auth-brand-panel">
+            <div class="auth-brand">
+                <div class="auth-brand-icon">B</div>
+                <span>BizStock</span>
+            </div>
 
-    <form method="POST">
+            <div class="auth-brand-content">
+                <span class="auth-eyebrow">GET STARTED WITH BIZSTOCK</span>
+                <h1>Build a smarter way to manage your business.</h1>
+                <p>
+                    Bring your products, stock, suppliers, purchases and sales
+                    together in one organised workspace.
+                </p>
+            </div>
 
-        {% csrf_token %}
+            <div class="auth-brand-footer">
+                Everything your business needs to stay organised.
+            </div>
+        </section>
 
-        {{ form.non_field_errors }}
+        <section class="auth-form-section register-section">
+            <div class="auth-card register-card">
 
-        <div>
-            <label>First Name</label>
-            {{ form.first_name }}
-            {{ form.first_name.errors }}
-        </div>
+                <div class="auth-mobile-brand">
+                    <div class="auth-brand-icon">B</div>
+                    <span>BizStock</span>
+                </div>
 
-        <div>
-            <label>Last Name</label>
-            {{ form.last_name }}
-            {{ form.last_name.errors }}
-        </div>
+                <div class="auth-heading">
+                    <span class="auth-eyebrow">CREATE YOUR ACCOUNT</span>
+                    <h2>Get started with BizStock</h2>
+                    <p>Set up your account and business information below.</p>
+                </div>
 
-        <div>
-            <label>Username</label>
-            {{ form.username }}
-            {{ form.username.errors }}
-        </div>
+                <form method="POST" class="auth-form">
+                    {% csrf_token %}
 
-        <div>
-            <label>Email</label>
-            {{ form.email }}
-            {{ form.email.errors }}
-        </div>
+                    {% if form.non_field_errors %}
+                        <div class="auth-alert">
+                            {{ form.non_field_errors }}
+                        </div>
+                    {% endif %}
 
-        <div>
-            <label>Password</label>
-            {{ form.password }}
-            {{ form.password.errors }}
-        </div>
+                    <div class="auth-form-section-heading">
+                        <span class="auth-section-number">01</span>
+                        <div>
+                            <h3>Account Information</h3>
+                            <p>Your personal login details</p>
+                        </div>
+                    </div>
 
-        <div>
-            <label>Confirm Password</label>
-            {{ form.confirm_password }}
-            {{ form.confirm_password.errors }}
-        </div>
+                    <div class="auth-fields-grid">
 
-        <hr>
+                        <div class="auth-field">
+                            <label for="{{ form.first_name.id_for_label }}">First Name</label>
+                            {{ form.first_name }}
+                            {{ form.first_name.errors }}
+                        </div>
 
-        <h2>Business Information</h2>
+                        <div class="auth-field">
+                            <label for="{{ form.last_name.id_for_label }}">Last Name</label>
+                            {{ form.last_name }}
+                            {{ form.last_name.errors }}
+                        </div>
 
-        <div>
-            <label>Business Name</label>
-            {{ form.business_name }}
-            {{ form.business_name.errors }}
-        </div>
+                        <div class="auth-field">
+                            <label for="{{ form.username.id_for_label }}">Username</label>
+                            {{ form.username }}
+                            {{ form.username.errors }}
+                        </div>
 
-        <div>
-            <label>Business Type</label>
-            {{ form.business_type }}
-            {{ form.business_type.errors }}
-        </div>
+                        <div class="auth-field">
+                            <label for="{{ form.email.id_for_label }}">Email Address</label>
+                            {{ form.email }}
+                            {{ form.email.errors }}
+                        </div>
 
-        <div>
-            <label>Phone</label>
-            {{ form.phone }}
-            {{ form.phone.errors }}
-        </div>
+                        <div class="auth-field">
+                            <label for="{{ form.password.id_for_label }}">Password</label>
+                            {{ form.password }}
+                            {{ form.password.errors }}
+                        </div>
 
-        <div>
-            <label>Address</label>
-            {{ form.address }}
-            {{ form.address.errors }}
-        </div>
+                        <div class="auth-field">
+                            <label for="{{ form.confirm_password.id_for_label }}">Confirm Password</label>
+                            {{ form.confirm_password }}
+                            {{ form.confirm_password.errors }}
+                        </div>
 
-        <button type="submit">
-            Create Account
-        </button>
+                    </div>
 
-    </form>
+                    <div class="auth-form-section-heading business-form-heading">
+                        <span class="auth-section-number">02</span>
+                        <div>
+                            <h3>Business Information</h3>
+                            <p>Tell us about the business you're managing</p>
+                        </div>
+                    </div>
 
-    <p>
-        Already have an account?
-        <a href="{% url 'login' %}">Login</a>
-    </p>
+                    <div class="auth-fields-grid">
+
+                        <div class="auth-field">
+                            <label for="{{ form.business_name.id_for_label }}">Business Name</label>
+                            {{ form.business_name }}
+                            {{ form.business_name.errors }}
+                        </div>
+
+                        <div class="auth-field">
+                            <label for="{{ form.business_type.id_for_label }}">Business Type</label>
+                            {{ form.business_type }}
+                            {{ form.business_type.errors }}
+                        </div>
+
+                        <div class="auth-field">
+                            <label for="{{ form.phone.id_for_label }}">Phone Number</label>
+                            {{ form.phone }}
+                            {{ form.phone.errors }}
+                        </div>
+
+                        <div class="auth-field">
+                            <label for="{{ form.address.id_for_label }}">Business Address</label>
+                            {{ form.address }}
+                            {{ form.address.errors }}
+                        </div>
+
+                    </div>
+
+                    <button type="submit" class="auth-submit">
+                        Create My Account
+                    </button>
+
+                </form>
+
+                <div class="auth-footer">
+                    Already have an account?
+                    <a href="{% url 'login' %}">Sign in</a>
+                </div>
+
+            </div>
+        </section>
+
+    </main>
 
 </body>
 </html>

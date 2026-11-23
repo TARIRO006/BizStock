@@ -72,30 +72,74 @@
     <!-- Sales overview -->
     <div class="dashboard-panel sales-panel">
 
-        <div class="panel-header">
-            <div>
-                <h2>Sales Overview</h2>
-                <p>Revenue and gross profit for the selected period</p>
-            </div>
+       
+<div class="panel-header sales-panel-header">
+    <div class="sales-panel-title">
+        <h2>Sales Overview</h2>
+        <p>Revenue and gross profit for the selected period</p>
+    </div>
+</div>
 
-            <form method="get" class="dashboard-period-form">
-                <label for="period">Reporting period</label>
-                <select id="period" name="period" onchange="this.form.submit()">
-                    <option value="today" {% if period == 'today' %}selected{% endif %}>
-                        Today
-                    </option>
-                    <option value="7" {% if period == '7' %}selected{% endif %}>
-                        Last 7 days
-                    </option>
-                    <option value="30" {% if period == '30' %}selected{% endif %}>
-                        Last 30 days
-                    </option>
-                    <option value="all" {% if period == 'all' %}selected{% endif %}>
-                        All time
-                    </option>
-                </select>
-            </form>
+<div class="sales-report-controls">
+    <form method="get" class="dashboard-period-form">
+        <label for="period">Reporting period</label>
+        <select
+            id="period"
+            name="period"
+            onchange="this.form.submit()"
+        >
+            <option value="today" {% if period == 'today' %}selected{% endif %}>
+                Today
+            </option>
+            <option value="7" {% if period == '7' %}selected{% endif %}>
+                Last 7 days
+            </option>
+            <option value="30" {% if period == '30' %}selected{% endif %}>
+                Last 30 days
+            </option>
+            <option value="all" {% if period == 'all' %}selected{% endif %}>
+                All time
+            </option>
+        </select>
+    </form>
+
+    <div class="sales-date-divider"></div>
+
+    <form method="get" class="date-range-form">
+        <input type="hidden" name="period" value="custom">
+
+        <div class="date-range-field">
+            <label for="start_date">From</label>
+            <input
+                type="date"
+                id="start_date"
+                name="start_date"
+                value="{{ start_date|date:'Y-m-d' }}"
+                required
+            >
         </div>
+
+        <div class="date-range-field">
+            <label for="end_date">To</label>
+            <input
+                type="date"
+                id="end_date"
+                name="end_date"
+                value="{{ end_date|date:'Y-m-d' }}"
+                required
+            >
+        </div>
+
+        <button type="submit" class="primary-button">
+            Apply
+        </button>
+
+        <a href="{% url 'dashboard' %}" class="secondary-button">
+            Reset
+        </a>
+    </form>
+</div>
+
 
         <div class="dashboard-sales-summary">
             <div>
@@ -118,6 +162,77 @@
             Gross profit is revenue minus the recorded product cost.
             It does not include other business expenses.
         </p>
+
+        
+<div class="sales-chart-container">
+    <canvas id="salesTrendChart"></canvas>
+</div>
+
+{{ chart_labels|json_script:"sales-chart-labels" }}
+{{ chart_values|json_script:"sales-chart-values" }}
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    const salesLabels = JSON.parse(
+        document.getElementById('sales-chart-labels').textContent
+    );
+
+    const salesValues = JSON.parse(
+        document.getElementById('sales-chart-values').textContent
+    );
+
+    const chartCanvas = document.getElementById('salesTrendChart');
+
+    if (chartCanvas) {
+        new Chart(chartCanvas, {
+            type: 'line',
+            data: {
+                labels: salesLabels,
+                datasets: [{
+                    label: 'Sales Revenue (MK)',
+                    data: salesValues,
+                    borderColor: '#3b82f6',
+                    backgroundColor: 'rgba(59, 130, 246, 0.12)',
+                    fill: true,
+                    tension: 0.3,
+                    pointRadius: 3,
+                    pointHoverRadius: 5
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: {
+                    intersect: false,
+                    mode: 'index'
+                },
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top'
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Revenue (MK)'
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Date'
+                        }
+                    }
+                }
+            }
+        });
+    }
+</script>
+
 
     </div>
 
@@ -219,12 +334,14 @@
 </div>
 
 <!-- Shop performance -->
+
+<!-- Shop performance -->
 <div class="dashboard-panel dashboard-section">
 
     <div class="panel-header">
         <div>
             <h2>Shop Performance</h2>
-            <p>Revenue by shop for the selected reporting period</p>
+            <p>Compare revenue and profitability across your shops</p>
         </div>
     </div>
 
@@ -235,14 +352,43 @@
                     <tr>
                         <th>Shop</th>
                         <th>Revenue</th>
+                        <th>Gross Profit</th>
+                        <th>Completed Sales</th>
+                        <th>Revenue Share</th>
                     </tr>
                 </thead>
 
                 <tbody>
                     {% for shop in top_shops %}
                         <tr>
-                            <td>{{ shop.name }}</td>
-                            <td>MK {{ shop.revenue|floatformat:2 }}</td>
+                            <td>
+                                <strong>{{ shop.name }}</strong>
+                            </td>
+
+                            <td>
+                                MK {{ shop.revenue|floatformat:2 }}
+                            </td>
+
+                            <td>
+                                MK {{ shop.gross_profit|floatformat:2 }}
+                            </td>
+
+                            <td>{{ shop.sales_count }}</td>
+
+                            <td>
+                                <div class="shop-revenue-share">
+                                    <div class="shop-revenue-share-track">
+                                        <div
+                                            class="shop-revenue-share-fill"
+                                            style="width: {{ shop.revenue_percentage }}%;"
+                                        ></div>
+                                    </div>
+
+                                    <span>
+                                        {{ shop.revenue_percentage|floatformat:1 }}%
+                                    </span>
+                                </div>
+                            </td>
                         </tr>
                     {% endfor %}
                 </tbody>
@@ -257,5 +403,6 @@
     {% endif %}
 
 </div>
+
 
 {% endblock %}

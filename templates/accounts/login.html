@@ -1,60 +1,99 @@
+
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <title>Login | BizStock</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
 </head>
 
-<body>
+<body class="auth-page">
 
-    <h1>Welcome back</h1>
+    <main class="auth-layout">
 
-    <p>Login to your BizStock account.</p>
+        <section class="auth-brand-panel">
+            <div class="auth-brand">
+                <div class="auth-brand-icon">B</div>
+                <span>BizStock</span>
+            </div>
 
-    {% if error %}
-        <p>{{ error }}</p>
-    {% endif %}
+            <div class="auth-brand-content">
+                <span class="auth-eyebrow">BUSINESS MANAGEMENT MADE SIMPLE</span>
+                <h1>Take control of your business.</h1>
+                <p>
+                    Manage your inventory, track sales, monitor stock
+                    and understand your business performance — all in one place.
+                </p>
+            </div>
 
-    <form method="POST">
+            <div class="auth-brand-footer">
+                Smart inventory management for growing businesses.
+            </div>
+        </section>
 
-        {% csrf_token %}
+        <section class="auth-form-section">
+            <div class="auth-card">
 
-        <div>
-            <label>Username</label>
+                <div class="auth-mobile-brand">
+                    <div class="auth-brand-icon">B</div>
+                    <span>BizStock</span>
+                </div>
 
-            <input
-                type="text"
-                name="username"
-                placeholder="Enter your username"
-                required
-            >
-        </div>
+                <div class="auth-heading">
+                    <span class="auth-eyebrow">WELCOME BACK</span>
+                    <h2>Sign in to your account</h2>
+                    <p>Enter your details to access your dashboard.</p>
+                </div>
 
-        <div>
-            <label>Password</label>
+                {% if error %}
+                    <div class="auth-alert">
+                        {{ error }}
+                    </div>
+                {% endif %}
 
-            <input
-                type="password"
-                name="password"
-                placeholder="Enter your password"
-                required
-            >
-        </div>
+                <form method="POST" class="auth-form">
+                    {% csrf_token %}
 
-        <button type="submit">
-            Login
-        </button>
+                    <div class="auth-field">
+                        <label for="username">Username</label>
+                        <input
+                            type="text"
+                            id="username"
+                            name="username"
+                            placeholder="Enter your username"
+                            autocomplete="username"
+                            required
+                        >
+                    </div>
 
-    </form>
+                    <div class="auth-field">
+                        <label for="password">Password</label>
+                        <input
+                            type="password"
+                            id="password"
+                            name="password"
+                            placeholder="Enter your password"
+                            autocomplete="current-password"
+                            required
+                        >
+                    </div>
 
-    <p>
-        Don't have an account?
-        <a href="{% url 'register' %}">
-            Create one
-        </a>
-    </p>
+                    <button type="submit" class="auth-submit">
+                        Sign In
+                    </button>
+                </form>
+
+                <div class="auth-footer">
+                    Don't have an account?
+                    <a href="{% url 'register' %}">Create an account</a>
+                </div>
+
+            </div>
+        </section>
+
+    </main>
 
 </body>
 </html>
